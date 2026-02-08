@@ -6,8 +6,9 @@
     "compilerOptions": {
         "composite": true,
         "jsx": "react-jsx",
-        "types": [
-            "electron-vite/client"
-        ]
+        "module": "ESNext",
+        "moduleResolution": "Bundler",
+        "skipLibCheck": true,
+        "types": []
     }
 }

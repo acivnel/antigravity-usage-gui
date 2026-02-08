@@ -6,7 +6,10 @@ const api = {
     login: () => ipcRenderer.invoke('login'),
     checkAuth: () => ipcRenderer.invoke('check-auth'),
     getQuota: () => ipcRenderer.invoke('get-quota'),
-    logout: () => ipcRenderer.invoke('logout')
+    logout: () => ipcRenderer.invoke('logout'),
+    checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
+    quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
+    onUpdateStatus: (callback) => ipcRenderer.on('update-status', (_event, value) => callback(value))
 }
 
 if (process.contextIsolated) {

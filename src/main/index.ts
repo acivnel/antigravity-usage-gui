@@ -7,7 +7,7 @@ import { fetchQuota } from './lib/quota/service'
 import { deleteTokens } from './lib/google/storage'
 import { initTray } from './lib/tray'
 import { initUpdater } from './lib/updater'
-import { autoUpdater } from 'electron-updater'
+
 
 let mainWindow: BrowserWindow | null = null
 
@@ -107,14 +107,8 @@ app.whenReady().then(() => {
 
     if (mainWindow) {
         initTray(mainWindow)
-        // Initialize updater after window is ready
-        if (!is.dev) {
-            initUpdater(mainWindow)
-            // Check for updates shortly after launch
-            setTimeout(() => {
-                autoUpdater.checkForUpdatesAndNotify()
-            }, 3000)
-        }
+        // Initialize updater handlers always, but auto-check only in prod logic inside updater
+        initUpdater(mainWindow)
     }
 
     app.on('activate', function () {

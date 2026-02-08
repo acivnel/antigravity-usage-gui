@@ -3,21 +3,22 @@ import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Layout, Button, Card } from './components/ui'
 import { QuotaCard } from './components/QuotaCard'
-import { LanguageSelector } from './components/LanguageSelector'
+import { SettingsModal } from './components/SettingsModal'
+import { MdSettings } from 'react-icons/md'
 
-// Models to prioritize/show as requested
+// Models from the provided user image/request
 const KNOWN_MODELS = [
-    'gemini-3-pro-high',
-    'gemini-3-pro-low',
-    'gemini-3-flash',
+    'Gemini 3 Pro (High)',
+    'Gemini 3 Pro (Low)',
+    'Gemini 3 Flash',
+    'Claude Sonnet 4.5',
+    'Claude Sonnet 4.5 (Thinking)',
+    'Claude Opus 4.5 (Thinking)',
+    'GPT-OSS 120B (Medium)',
     'claude-3-5-sonnet',
-    'claude-3-5-sonnet-thinking',
-    'claude-3-opus-thinking',
-    'gpt-4o',
-    'gpt-oss-120b-medium'
+    'gpt-4o'
 ]
 
-// Helper to normalize model names for comparison
 const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
 
 function App(): JSX.Element {
@@ -26,6 +27,7 @@ function App(): JSX.Element {
     const [quotas, setQuotas] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false)
 
     useEffect(() => {
         checkStatus()
@@ -39,20 +41,20 @@ function App(): JSX.Element {
 
             const data = await window.api.getQuota()
             if (data && data.length > 0) {
-                // Filter quotas to only show known models or prioritize them
-                // User requested "output ONLY these models".
+                // Advanced filtering: check if model name OR display name matches any of our known patterns
                 const filtered = data.filter(model => {
                     const id = normalize(model.model)
                     const name = normalize(model.displayName || '')
-                    return KNOWN_MODELS.some(k => id.includes(normalize(k)) || name.includes(normalize(k)))
+                    return KNOWN_MODELS.some(k => {
+                        const normalizedK = normalize(k)
+                        return id.includes(normalizedK) || name.includes(normalizedK) || normalizedK.includes(id)
+                    })
                 })
 
-                // If filter removes everything (e.g. models have different internal names), fall back to all
-                // But better to just show filtered if not empty, otherwise show all sorted
+                // If everything is filtered out, show all to be safe, but typically we want the filtered list
                 const finalData = filtered.length > 0 ? filtered : data
 
                 const sorted = finalData.sort((a, b) => {
-                    // Sort by remaining percentage ascending
                     return a.remaining - b.remaining
                 })
 
@@ -74,7 +76,6 @@ function App(): JSX.Element {
         try {
             const res = await window.api.login()
             if (res.success) {
-                // Token is saved by main process, just check status
                 await checkStatus()
             } else {
                 setError(res.error || t('app.error'))
@@ -92,29 +93,23 @@ function App(): JSX.Element {
         setIsLoggedIn(false)
     }
 
-    if (loading && !quotas.length) {
-        return (
-            <Layout>
-                <div className="flex items-center justify-center h-[60vh] flex-col gap-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
-                    <p className="text-neutral-500 text-sm">{t('app.loading')}</p>
-                </div>
-            </Layout>
-        )
-    }
-
     return (
         <Layout>
             <header className="flex justify-between items-center mb-6 shrink-0 z-10">
                 <div>
-                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
+                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400 dark:from-indigo-400 dark:to-cyan-400">
                         {t('app.title')}
                     </h1>
-                    <p className="text-neutral-400 text-xs mt-1">{t('app.subtitle')}</p>
+                    <p className="text-neutral-500 dark:text-neutral-400 text-xs mt-1">{t('app.subtitle')}</p>
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <LanguageSelector />
+                    <button
+                        onClick={() => setIsSettingsOpen(true)}
+                        className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-lg transition-colors text-neutral-600 dark:text-neutral-400"
+                    >
+                        <MdSettings className="text-xl" />
+                    </button>
                     {isLoggedIn || quotas.length > 0 ? (
                         <Button variant="secondary" onClick={handleLogout} className="text-xs px-3 py-1.5">{t('app.logout')}</Button>
                     ) : (
@@ -127,7 +122,7 @@ function App(): JSX.Element {
                 <motion.div
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-red-500/10 border border-red-500/20 text-red-400 p-4 rounded-xl mb-6 shrink-0"
+                    className="bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 p-4 rounded-xl mb-6 shrink-0"
                 >
                     {error}
                 </motion.div>
@@ -135,39 +130,47 @@ function App(): JSX.Element {
 
             {!isLoggedIn && quotas.length === 0 && !loading && (
                 <Card className="text-center py-12 shrink-0">
-                    <h2 className="text-xl font-semibold mb-2">{t('app.welcome.title')}</h2>
-                    <p className="text-neutral-400 mb-6 max-w-md mx-auto">
+                    <h2 className="text-xl font-semibold mb-2 dark:text-white">{t('app.welcome.title')}</h2>
+                    <p className="text-neutral-500 dark:text-neutral-400 mb-6 max-w-md mx-auto">
                         {t('app.welcome.subtitle')}
                     </p>
                     <Button onClick={handleLogin}>{t('app.welcome.connect')}</Button>
                 </Card>
             )}
 
-            {/* Scrollable Container with Padding for Scrollbar */}
-            <div className="flex-1 overflow-y-auto min-h-0 pr-2 -mr-2 custom-scrollbar">
-                <div className="grid gap-4 md:grid-cols-2 pb-6">
-                    <AnimatePresence>
-                        {quotas.map((model, index) => (
-                            <motion.div
-                                key={model.model}
-                                initial={{ opacity: 0, scale: 0.95 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.2, delay: index * 0.05 }}
-                            >
-                                <QuotaCard model={model} />
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
+            {loading && !quotas.length ? (
+                <div className="flex-1 flex flex-col items-center justify-center gap-4">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
+                    <p className="text-neutral-500 text-sm">{t('app.loading')}</p>
                 </div>
-            </div>
+            ) : (
+                <div className="flex-1 overflow-y-auto min-h-0 pr-2 -mr-2 custom-scrollbar">
+                    <div className="grid gap-4 md:grid-cols-2 pb-6">
+                        <AnimatePresence>
+                            {quotas.map((model, index) => (
+                                <motion.div
+                                    key={model.model}
+                                    initial={{ opacity: 0, scale: 0.95 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                                >
+                                    <QuotaCard model={model} />
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
+                    </div>
+                </div>
+            )}
 
             {quotas.length > 0 && (
-                <div className="mt-2 flex justify-center shrink-0 pt-3 border-t border-neutral-800">
+                <div className="mt-2 flex justify-center shrink-0 pt-3 border-t border-neutral-200 dark:border-neutral-800">
                     <Button variant="secondary" onClick={checkStatus} className="text-xs">
                         {t('app.refresh')}
                     </Button>
                 </div>
             )}
+
+            <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
         </Layout>
     )
 }
