@@ -1,0 +1,20 @@
+{
+    "app": {
+        "title": "Antigravity Usage",
+        "subtitle": "Monitor your AI model quotas",
+        "welcome": {
+            "title": "Welcome",
+            "subtitle": "Connect to your local IDE seamlessly or sign in with Google to view your Antigravity quotas.",
+            "connect": "Connect Google Account"
+        },
+        "login": "Sign in with Google",
+        "logout": "Sign Out",
+        "refresh": "Refresh Data",
+        "loading": "Loading...",
+        "error": "An error occurred",
+        "quota": {
+            "left": "LEFT",
+            "reset": "Resets at:"
+        }
+    }
+}

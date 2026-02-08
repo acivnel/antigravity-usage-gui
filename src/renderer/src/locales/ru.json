@@ -1,0 +1,20 @@
+{
+    "app": {
+        "title": "Antigravity Usage",
+        "subtitle": "Мониторинг квот AI моделей",
+        "welcome": {
+            "title": "Добро пожаловать",
+            "subtitle": "Подключитесь к локальной IDE или войдите через Google для просмотра квот Antigravity.",
+            "connect": "Подключить аккаунт Google"
+        },
+        "login": "Войти через Google",
+        "logout": "Выйти",
+        "refresh": "Обновить данные",
+        "loading": "Загрузка...",
+        "error": "Произошла ошибка",
+        "quota": {
+            "left": "ОСТАЛОСЬ",
+            "reset": "Сброс в:"
+        }
+    }
+}
