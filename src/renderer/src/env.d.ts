@@ -12,7 +12,11 @@ interface Window {
     api: {
         login: () => Promise<{ success: boolean; error?: string }>
         checkAuth: () => Promise<boolean>
-        getQuota: () => Promise<any[]>
+        getQuota: () => Promise<any[] & { source?: string }>
+        getAccounts: () => Promise<Array<{ email: string; isActive: boolean; projectId?: string }>>
+        switchAccount: (email: string) => Promise<boolean>
+        removeAccount: (email: string) => Promise<void>
+        addAccount: () => Promise<{ success: boolean; error?: string }>
         logout: () => Promise<boolean>
         checkForUpdates: () => Promise<void>
         quitAndInstall: () => Promise<void>

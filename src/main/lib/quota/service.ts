@@ -43,14 +43,16 @@ async function fetchLocalQuota(): Promise<QuotaInfo[] | null> {
     }
 }
 
-export async function fetchQuota(): Promise<QuotaInfo[]> {
+export async function fetchQuota(): Promise<QuotaInfo[] & { source?: string }> {
     debug('quota', 'Fetching quota...')
 
     // Try local first
     const localQuota = await fetchLocalQuota()
     if (localQuota) {
         debug('quota', 'Using local quota from IDE')
-        return localQuota
+        const result = localQuota as QuotaInfo[] & { source: string }
+        result.source = 'local'
+        return result
     }
 
     // Fallback to cloud
@@ -86,5 +88,7 @@ export async function fetchQuota(): Promise<QuotaInfo[]> {
         }
     }
 
-    return quotas
+    const result = quotas as QuotaInfo[] & { source: string }
+    result.source = 'cloud'
+    return result
 }

@@ -19,7 +19,11 @@
       }
     ],
     "win": {
-      "target": "nsis"
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "forceCodeSigning": false
     },
     "nsis": {
       "oneClick": false,

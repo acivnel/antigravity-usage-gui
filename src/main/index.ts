@@ -4,7 +4,6 @@ import { electronApp, optimizer, is } from '@electron-toolkit/utils'
 import { startOAuthFlow } from './lib/google/oauth'
 import { getTokenManager } from './lib/google/token-manager'
 import { fetchQuota } from './lib/quota/service'
-import { deleteTokens } from './lib/google/storage'
 import { initTray } from './lib/tray'
 import { initUpdater } from './lib/updater'
 
@@ -98,9 +97,35 @@ app.whenReady().then(() => {
     })
 
     ipcMain.handle('logout', () => {
-        deleteTokens()
-        getTokenManager().reload()
+        // Log out current account
+        const tm = getTokenManager()
+        const current = tm.getEmail()
+        if (current) {
+            tm.removeAccount(current)
+        }
+        tm.reload() // Should pick next available or none
         return true
+    })
+
+    ipcMain.handle('get-accounts', () => {
+        return getTokenManager().getAccounts()
+    })
+
+    ipcMain.handle('switch-account', async (_, email) => {
+        return getTokenManager().switchAccount(email)
+    })
+
+    ipcMain.handle('remove-account', async (_, email) => {
+        return getTokenManager().removeAccount(email)
+    })
+
+    ipcMain.handle('add-account', async () => {
+        // Similar to login but intended for adding another
+        const result = await startOAuthFlow()
+        if (result.success) {
+            getTokenManager().reload()
+        }
+        return result
     })
 
     createWindow()

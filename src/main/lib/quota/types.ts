@@ -13,3 +13,16 @@ export interface OAuthTokenResponse {
     scope: string
     token_type: string
 }
+
+export type QuotaSource = 'cloud' | 'local'
+
+export interface AccountInfo {
+    email: string
+    isActive: boolean
+    projectId?: string
+}
+
+export interface StorageSchema {
+    currentEmail: string | null
+    accounts: Record<string, StoredTokens>
+}
