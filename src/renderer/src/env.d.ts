@@ -20,5 +20,6 @@ interface Window {
         logout: () => Promise<boolean>
         checkForUpdates: () => Promise<void>
         quitAndInstall: () => Promise<void>
+        onUpdateStatus: (callback: (data: any) => void) => () => void
     }
 }

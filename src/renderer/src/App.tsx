@@ -5,6 +5,7 @@ import { Layout, Button, Card } from './components/ui'
 import { QuotaCard } from './components/QuotaCard'
 import { AccountSwitcher } from './components/AccountSwitcher'
 import { SettingsModal } from './components/SettingsModal'
+import { UpdateNotification } from './components/UpdateNotification'
 import { MdSettings, MdCloudQueue, MdLaptop } from 'react-icons/md'
 
 // Models from the provided user image/request
@@ -17,7 +18,8 @@ const KNOWN_MODELS = [
     'Claude Opus 4.5 (Thinking)',
     'GPT-OSS 120B (Medium)',
     'claude-3-5-sonnet',
-    'gpt-4o'
+    'gpt-4o',
+    'Opus 4.6'
 ]
 
 const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -247,6 +249,7 @@ function App(): JSX.Element {
             )}
 
             <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
+            <UpdateNotification />
         </Layout>
     )
 }
