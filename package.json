@@ -1,6 +1,6 @@
 {
   "name": "antigravity-usage-gui",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Antigravity Usage GUI",
   "main": "./out/main/index.js",
   "author": "Antigravity",
@@ -11,6 +11,7 @@
   "build": {
     "appId": "com.antigravity.usage",
     "productName": "Antigravity Usage",
+    "artifactName": "${name}-${version}-setup.${ext}",
     "publish": [
       {
         "provider": "github",
