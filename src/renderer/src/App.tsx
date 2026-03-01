@@ -8,18 +8,14 @@ import { SettingsModal } from './components/SettingsModal'
 import { UpdateNotification } from './components/UpdateNotification'
 import { MdSettings, MdCloudQueue, MdLaptop } from 'react-icons/md'
 
-// Models from the provided user image/request
+// Models matching the user's actual usage
 const KNOWN_MODELS = [
-    'Gemini 3 Pro (High)',
-    'Gemini 3 Pro (Low)',
+    'Gemini 3.1 Pro (High)',
+    'Gemini 3.1 Pro (Low)',
     'Gemini 3 Flash',
-    'Claude Sonnet 4.5',
-    'Claude Sonnet 4.5 (Thinking)',
-    'Claude Opus 4.5 (Thinking)',
+    'Claude Sonnet 4.6 (Thinking)',
+    'Claude Opus 4.6 (Thinking)',
     'GPT-OSS 120B (Medium)',
-    'claude-3-5-sonnet',
-    'gpt-4o',
-    'Opus 4.6'
 ]
 
 const normalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -61,32 +57,20 @@ function App(): JSX.Element {
             if (data && data.length > 0) {
                 setQuotaSource(data.source as any || 'cloud')
 
-                // Advanced filtering: check if model name OR display name matches any of our known patterns
                 const filtered = data.filter(model => {
                     const id = normalize(model.model)
                     const name = normalize(model.displayName || '')
                     return KNOWN_MODELS.some(k => {
                         const normalizedK = normalize(k)
-                        return id.includes(normalizedK) || name.includes(normalizedK) || normalizedK.includes(id)
+                        return id.includes(normalizedK) || name.includes(normalizedK) || normalizedK.includes(id) || normalizedK.includes(name)
                     })
                 })
 
-                // If everything is filtered out, show all to be safe, but typically we want the filtered list
-                // Also ensures we don't accidentally filter out everything if the list changes
                 const finalData = filtered.length > 0 ? filtered : data
-
-                const sorted = finalData.sort((a, b) => {
-                    return a.remaining - b.remaining
-                })
-
+                const sorted = finalData.sort((a, b) => a.remaining - b.remaining)
                 setQuotas(sorted)
             } else {
                 setQuotas([])
-                if (loggedIn) {
-                    // Only show error if logged in and strictly no data found (and not just empty array from standard response)
-                    // But typically getQuota returns [] on error or empty. 
-                    // We might want to clear error if we are just empty.
-                }
             }
         } catch (err) {
             console.error(err)
@@ -151,30 +135,28 @@ function App(): JSX.Element {
         }
     }
 
-
-
     return (
         <Layout>
-            <header className="flex justify-between items-center mb-6 shrink-0 z-10">
+            <header className="flex justify-between items-center mb-4 pt-2 shrink-0 z-10">
                 <div>
-                    <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400 dark:from-indigo-400 dark:to-cyan-400">
+                    <h1 className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
                         {t('app.title')}
                     </h1>
-                    <div className="flex items-center gap-2 mt-1">
-                        <p className="text-neutral-500 dark:text-neutral-400 text-xs">{t('app.subtitle')}</p>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                        <p className="text-neutral-500 dark:text-neutral-400 text-[11px]">{t('app.subtitle')}</p>
                         {quotaSource && (
-                            <div className={`flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded-full border ${quotaSource === 'local'
+                            <div className={`flex items-center gap-1 text-[9px] px-1.5 py-0.5 rounded-full border ${quotaSource === 'local'
                                 ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400'
                                 : 'bg-blue-500/10 border-blue-500/20 text-blue-600 dark:text-blue-400'
                                 }`}>
-                                {quotaSource === 'local' ? <MdLaptop /> : <MdCloudQueue />}
-                                <span>{quotaSource === 'local' ? 'Local' : 'Cloud'}</span>
+                                {quotaSource === 'local' ? <MdLaptop className="text-[10px]" /> : <MdCloudQueue className="text-[10px]" />}
+                                <span>{t(`app.source.${quotaSource}`)}</span>
                             </div>
                         )}
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
                     {isLoggedIn && accounts.length > 0 && (
                         <AccountSwitcher
                             accounts={accounts}
@@ -186,30 +168,30 @@ function App(): JSX.Element {
 
                     <button
                         onClick={() => setIsSettingsOpen(true)}
-                        className="p-2 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-lg transition-colors text-neutral-600 dark:text-neutral-400"
+                        className="p-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-lg transition-colors text-neutral-600 dark:text-neutral-400"
                     >
-                        <MdSettings className="text-xl" />
+                        <MdSettings className="text-lg" />
                     </button>
                     {!isLoggedIn && (
-                        <Button onClick={handleLogin} className="text-xs px-3 py-1.5">{t('app.login')}</Button>
+                        <Button onClick={handleLogin} className="text-[11px] px-2.5 py-1">{t('app.login')}</Button>
                     )}
                 </div>
             </header>
 
             {error && (
                 <motion.div
-                    initial={{ opacity: 0, y: -20 }}
+                    initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 p-4 rounded-xl mb-6 shrink-0"
+                    className="bg-red-500/10 border border-red-500/20 text-red-500 dark:text-red-400 p-3 rounded-lg mb-4 text-xs shrink-0"
                 >
                     {error}
                 </motion.div>
             )}
 
             {!isLoggedIn && quotas.length === 0 && !loading && (
-                <Card className="text-center py-12 shrink-0">
-                    <h2 className="text-xl font-semibold mb-2 dark:text-white">{t('app.welcome.title')}</h2>
-                    <p className="text-neutral-500 dark:text-neutral-400 mb-6 max-w-md mx-auto">
+                <Card className="text-center py-8 shrink-0">
+                    <h2 className="text-lg font-semibold mb-1.5 dark:text-white">{t('app.welcome.title')}</h2>
+                    <p className="text-neutral-500 dark:text-neutral-400 mb-4 max-w-sm mx-auto text-xs">
                         {t('app.welcome.subtitle')}
                     </p>
                     <Button onClick={handleLogin}>{t('app.welcome.connect')}</Button>
@@ -217,20 +199,20 @@ function App(): JSX.Element {
             )}
 
             {loading && !quotas.length ? (
-                <div className="flex-1 flex flex-col items-center justify-center gap-4">
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-500"></div>
-                    <p className="text-neutral-500 text-sm">{t('app.loading')}</p>
+                <div className="flex-1 flex flex-col items-center justify-center gap-3">
+                    <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-indigo-500"></div>
+                    <p className="text-neutral-500 text-xs">{t('app.loading')}</p>
                 </div>
             ) : (
-                <div className="flex-1 overflow-y-auto min-h-0 pr-2 -mr-2 custom-scrollbar">
-                    <div className="grid gap-4 md:grid-cols-2 pb-6">
+                <div className="flex-1 overflow-y-auto min-h-0 pr-1 -mr-1 custom-scrollbar">
+                    <div className="flex flex-col gap-1.5 pb-4">
                         <AnimatePresence>
                             {quotas.map((model, index) => (
                                 <motion.div
                                     key={model.model}
-                                    initial={{ opacity: 0, scale: 0.95 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.2, delay: index * 0.05 }}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.2, delay: index * 0.04 }}
                                 >
                                     <QuotaCard model={model} />
                                 </motion.div>
@@ -241,8 +223,8 @@ function App(): JSX.Element {
             )}
 
             {quotas.length > 0 && (
-                <div className="mt-2 flex justify-center shrink-0 pt-3 border-t border-neutral-200 dark:border-neutral-800">
-                    <Button variant="secondary" onClick={checkStatus} className="text-xs">
+                <div className="mt-1 flex justify-center shrink-0 pt-2 border-t border-neutral-200 dark:border-neutral-800">
+                    <Button variant="secondary" onClick={checkStatus} className="text-[11px]">
                         {t('app.refresh')}
                     </Button>
                 </div>

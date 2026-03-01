@@ -4,17 +4,47 @@
         "subtitle": "Мониторинг квот AI моделей",
         "welcome": {
             "title": "Добро пожаловать",
-            "subtitle": "Подключитесь к локальной IDE или войдите через Google для просмотра квот Antigravity.",
-            "connect": "Подключить аккаунт Google"
+            "subtitle": "Подключитесь к локальной IDE или войдите через Google для просмотра квот.",
+            "connect": "Подключить Google"
         },
         "login": "Войти через Google",
         "logout": "Выйти",
-        "refresh": "Обновить данные",
+        "refresh": "Обновить",
         "loading": "Загрузка...",
         "error": "Произошла ошибка",
         "quota": {
             "left": "ОСТАЛОСЬ",
-            "reset": "Сброс в:"
+            "reset": "Сброс:",
+            "new": "Новая",
+            "exhausted": "Исчерпано"
+        },
+        "source": {
+            "local": "Локально",
+            "cloud": "Облако"
         }
+    },
+    "settings": {
+        "title": "Настройки",
+        "theme": "Тема",
+        "themeDark": "Тёмная тема",
+        "themeLight": "Светлая тема",
+        "language": "Язык",
+        "updates": "Обновления",
+        "checkUpdate": "Проверить"
+    },
+    "accounts": {
+        "title": "Аккаунты",
+        "add": "Добавить аккаунт",
+        "signOut": "Выйти"
+    },
+    "update": {
+        "available": "Доступно обновление: v{{version}}",
+        "downloading": "Загрузка... {{progress}}%",
+        "downloaded": "Готово к установке: v{{version}}",
+        "failed": "Ошибка обновления",
+        "downloadingHint": "Загружается в фоне",
+        "downloadedHint": "Перезапустите для применения",
+        "restart": "Перезапустить",
+        "later": "Позже"
     }
 }

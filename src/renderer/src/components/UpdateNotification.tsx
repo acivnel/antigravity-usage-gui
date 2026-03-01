@@ -1,50 +1,39 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MdSystemUpdateAlt, MdClose, MdCheckCircle, MdError, MdDownload } from 'react-icons/md'
 import { Button } from './ui'
 
 export function UpdateNotification(): JSX.Element | null {
+    const { t } = useTranslation()
     const [status, setStatus] = useState<string>('')
     const [progress, setProgress] = useState<number>(0)
     const [version, setVersion] = useState<string>('')
     const [isVisible, setIsVisible] = useState(false)
 
     useEffect(() => {
-        // Listen for update status
         const removeListener = window.api.onUpdateStatus((data: any) => {
-            console.log('Update status:', data)
-
-            if (data.status === 'checking') {
-                // Optional: show checking status, mostly silent
-            }
-            else if (data.status === 'available') {
+            if (data.status === 'available') {
                 setStatus('available')
                 setVersion(data.version)
                 setIsVisible(true)
-            }
-            else if (data.status === 'downloading') {
+            } else if (data.status === 'downloading') {
                 setStatus('downloading')
                 setProgress(Math.round(data.progress))
                 setIsVisible(true)
-            }
-            else if (data.status === 'downloaded') {
+            } else if (data.status === 'downloaded') {
                 setStatus('downloaded')
                 setVersion(data.version)
                 setIsVisible(true)
-            }
-            else if (data.status === 'error') {
+            } else if (data.status === 'error') {
                 setStatus('error')
                 setIsVisible(true)
-                // Auto hide error after 5s
                 setTimeout(() => setIsVisible(false), 5000)
-            }
-            else if (data.status === 'not-available') {
-                // Hide if explicitly valid "no update"
+            } else if (data.status === 'not-available') {
                 setIsVisible(false)
             }
         })
 
-        // Initial check
         window.api.checkForUpdates()
 
         return () => {
@@ -58,51 +47,50 @@ export function UpdateNotification(): JSX.Element | null {
         <AnimatePresence>
             {isVisible && (
                 <motion.div
-                    initial={{ opacity: 0, y: 50 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 50 }}
-                    className="fixed bottom-4 right-4 left-4 md:left-auto md:w-96 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl rounded-xl p-4 z-50"
+                    initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 40, scale: 0.95 }}
+                    className="fixed bottom-3 right-3 left-3 md:left-auto md:w-80 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 shadow-xl rounded-xl p-3 z-50"
                 >
-                    <div className="flex items-start gap-3">
-                        <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-500 shrink-0">
-                            {status === 'downloading' ? <MdDownload className="animate-bounce" /> :
-                                status === 'downloaded' ? <MdCheckCircle className="text-green-500" /> :
-                                    status === 'error' ? <MdError className="text-red-500" /> :
-                                        <MdSystemUpdateAlt />}
+                    <div className="flex items-start gap-2.5">
+                        <div className="p-1.5 bg-indigo-500/10 rounded-lg text-indigo-500 shrink-0">
+                            {status === 'downloading' ? <MdDownload className="text-base animate-bounce" /> :
+                                status === 'downloaded' ? <MdCheckCircle className="text-base text-green-500" /> :
+                                    status === 'error' ? <MdError className="text-base text-red-500" /> :
+                                        <MdSystemUpdateAlt className="text-base" />}
                         </div>
 
                         <div className="flex-1 min-w-0">
-                            <h3 className="font-medium text-sm text-neutral-900 dark:text-white">
-                                {status === 'available' && `Update Available: ${version}`}
-                                {status === 'downloading' && `Downloading Update... ${progress}%`}
-                                {status === 'downloaded' && `Ready to Install: ${version}`}
-                                {status === 'error' && `Update Failed`}
+                            <h3 className="font-medium text-xs text-neutral-900 dark:text-white">
+                                {status === 'available' && t('update.available', { version })}
+                                {status === 'downloading' && t('update.downloading', { progress })}
+                                {status === 'downloaded' && t('update.downloaded', { version })}
+                                {status === 'error' && t('update.failed')}
                             </h3>
 
-                            <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">
-                                {status === 'available' && "A new version is being downloaded in the background."}
+                            <p className="text-[10px] text-neutral-500 dark:text-neutral-400 mt-0.5">
+                                {status === 'available' && t('update.downloadingHint')}
                                 {status === 'downloading' && (
-                                    <div className="w-full bg-neutral-100 dark:bg-neutral-800 h-1.5 rounded-full mt-2 overflow-hidden">
-                                        <div
-                                            className="bg-indigo-500 h-full transition-all duration-300"
+                                    <span className="block w-full bg-neutral-100 dark:bg-neutral-800 h-1 rounded-full mt-1.5 overflow-hidden">
+                                        <span
+                                            className="block bg-indigo-500 h-full transition-all duration-300 rounded-full"
                                             style={{ width: `${progress}%` }}
                                         />
-                                    </div>
+                                    </span>
                                 )}
-                                {status === 'downloaded' && "Restart the app to apply the update."}
-                                {status === 'error' && "Something went wrong. Please try again later."}
+                                {status === 'downloaded' && t('update.downloadedHint')}
                             </p>
 
                             {status === 'downloaded' && (
-                                <div className="mt-3 flex gap-2">
-                                    <Button onClick={() => window.api.quitAndInstall()} className="text-xs py-1 px-3">
-                                        Restart & Install
+                                <div className="mt-2 flex gap-2">
+                                    <Button onClick={() => window.api.quitAndInstall()} className="text-[11px] py-1 px-2.5">
+                                        {t('update.restart')}
                                     </Button>
                                     <button
                                         onClick={() => setIsVisible(false)}
-                                        className="text-xs text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 px-2"
+                                        className="text-[11px] text-neutral-500 hover:text-neutral-700 dark:hover:text-neutral-300 px-1.5"
                                     >
-                                        Later
+                                        {t('update.later')}
                                     </button>
                                 </div>
                             )}
@@ -112,7 +100,7 @@ export function UpdateNotification(): JSX.Element | null {
                             onClick={() => setIsVisible(false)}
                             className="text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200"
                         >
-                            <MdClose />
+                            <MdClose className="text-sm" />
                         </button>
                     </div>
                 </motion.div>

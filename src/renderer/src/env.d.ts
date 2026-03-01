@@ -21,5 +21,9 @@ interface Window {
         checkForUpdates: () => Promise<void>
         quitAndInstall: () => Promise<void>
         onUpdateStatus: (callback: (data: any) => void) => () => void
+        getVersion: () => Promise<string>
+        windowMinimize: () => Promise<void>
+        windowMaximize: () => Promise<void>
+        windowClose: () => Promise<void>
     }
 }

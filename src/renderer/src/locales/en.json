@@ -4,17 +4,47 @@
         "subtitle": "Monitor your AI model quotas",
         "welcome": {
             "title": "Welcome",
-            "subtitle": "Connect to your local IDE seamlessly or sign in with Google to view your Antigravity quotas.",
+            "subtitle": "Connect to your local IDE or sign in with Google to view your Antigravity quotas.",
             "connect": "Connect Google Account"
         },
         "login": "Sign in with Google",
         "logout": "Sign Out",
-        "refresh": "Refresh Data",
+        "refresh": "Refresh",
         "loading": "Loading...",
         "error": "An error occurred",
         "quota": {
             "left": "LEFT",
-            "reset": "Resets at:"
+            "reset": "Resets:",
+            "new": "New",
+            "exhausted": "Exhausted"
+        },
+        "source": {
+            "local": "Local",
+            "cloud": "Cloud"
         }
+    },
+    "settings": {
+        "title": "Settings",
+        "theme": "Theme",
+        "themeDark": "Dark Mode",
+        "themeLight": "Light Mode",
+        "language": "Language",
+        "updates": "Updates",
+        "checkUpdate": "Check"
+    },
+    "accounts": {
+        "title": "Accounts",
+        "add": "Add account",
+        "signOut": "Sign out"
+    },
+    "update": {
+        "available": "Update available: v{{version}}",
+        "downloading": "Downloading... {{progress}}%",
+        "downloaded": "Ready to install: v{{version}}",
+        "failed": "Update failed",
+        "downloadingHint": "Downloading in the background",
+        "downloadedHint": "Restart the app to apply",
+        "restart": "Restart & Install",
+        "later": "Later"
     }
 }

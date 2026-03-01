@@ -13,7 +13,17 @@ const api = {
     logout: () => ipcRenderer.invoke('logout'),
     checkForUpdates: () => ipcRenderer.invoke('check-for-updates'),
     quitAndInstall: () => ipcRenderer.invoke('quit-and-install'),
-    onUpdateStatus: (callback) => ipcRenderer.on('update-status', (_event, value) => callback(value))
+    onUpdateStatus: (callback) => {
+        const handler = (_event, value) => callback(value)
+        ipcRenderer.on('update-status', handler)
+        return () => {
+            ipcRenderer.removeListener('update-status', handler)
+        }
+    },
+    getVersion: () => ipcRenderer.invoke('get-version'),
+    windowMinimize: () => ipcRenderer.invoke('window-minimize'),
+    windowMaximize: () => ipcRenderer.invoke('window-maximize'),
+    windowClose: () => ipcRenderer.invoke('window-close')
 }
 
 if (process.contextIsolated) {

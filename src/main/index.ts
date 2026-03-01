@@ -17,12 +17,7 @@ function createWindow(): void {
         height: 670,
         show: false,
         autoHideMenuBar: true,
-        titleBarStyle: 'hidden', // Custom title bar for Windows feel
-        titleBarOverlay: {
-            color: '#171717',
-            symbolColor: '#ffffff',
-            height: 30
-        },
+        frame: false,
         ...(process.platform === 'linux' ? { icon: join(__dirname, '../../build/icon.png') } : {}),
         webPreferences: {
             preload: join(__dirname, '../preload/index.js'),
@@ -135,6 +130,26 @@ app.whenReady().then(() => {
         // Initialize updater handlers always, but auto-check only in prod logic inside updater
         initUpdater(mainWindow)
     }
+
+    ipcMain.handle('get-version', () => {
+        return app.getVersion()
+    })
+
+    ipcMain.handle('window-minimize', () => {
+        mainWindow?.minimize()
+    })
+
+    ipcMain.handle('window-maximize', () => {
+        if (mainWindow?.isMaximized()) {
+            mainWindow.unmaximize()
+        } else {
+            mainWindow?.maximize()
+        }
+    })
+
+    ipcMain.handle('window-close', () => {
+        mainWindow?.close()
+    })
 
     app.on('activate', function () {
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
