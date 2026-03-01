@@ -6,9 +6,9 @@ import { error } from './core/logger'
 let tray: Tray | null = null
 
 export function initTray(mainWindow: BrowserWindow): void {
-    const iconPath = process.platform === 'win32'
-        ? join(__dirname, '../../resources/icon.ico')
-        // Fallback to a default icon or just use the same one, assuming build resources exist
+    // In production, it's relative to the app root. In dev, it's relative to out/main.
+    const iconPath = app.isPackaged
+        ? join(process.resourcesPath, 'icon.png')
         : join(__dirname, '../../resources/icon.png')
 
     // In development, handle missing icon gracefully

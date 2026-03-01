@@ -67,7 +67,25 @@ function App(): JSX.Element {
                 })
 
                 const finalData = filtered.length > 0 ? filtered : data
-                const sorted = finalData.sort((a, b) => a.remaining - b.remaining)
+
+                const getKnownIndex = (model: any) => {
+                    const id = normalize(model.model)
+                    const name = normalize(model.displayName || '')
+                    return KNOWN_MODELS.findIndex(k => {
+                        const normalizedK = normalize(k)
+                        return id.includes(normalizedK) || name.includes(normalizedK) || normalizedK.includes(id) || normalizedK.includes(name)
+                    })
+                }
+
+                const sorted = finalData.sort((a, b) => {
+                    const indexA = getKnownIndex(a)
+                    const indexB = getKnownIndex(b)
+                    if (indexA !== -1 && indexB !== -1) return indexA - indexB
+                    if (indexA !== -1) return -1
+                    if (indexB !== -1) return 1
+                    return a.model.localeCompare(b.model)
+                })
+
                 setQuotas(sorted)
             } else {
                 setQuotas([])
@@ -134,6 +152,20 @@ function App(): JSX.Element {
             setLoading(false)
         }
     }
+
+    const groupedQuotas = quotas.reduce((acc, q) => {
+        const name = (q.displayName || q.model || '').toLowerCase()
+        let p = 'Other'
+        if (name.includes('gemini')) p = 'Google'
+        else if (name.includes('claude')) p = 'Anthropic'
+        else if (name.includes('gpt-oss')) p = 'Open Source'
+
+        if (!acc[p]) acc[p] = []
+        acc[p].push(q)
+        return acc
+    }, {} as Record<string, any[]>)
+
+    const PROVIDER_ORDER = ['Google', 'Anthropic', 'Open Source', 'Other']
 
     return (
         <Layout>
@@ -205,18 +237,30 @@ function App(): JSX.Element {
                 </div>
             ) : (
                 <div className="flex-1 overflow-y-auto min-h-0 pr-1 -mr-1 custom-scrollbar">
-                    <div className="flex flex-col gap-1.5 pb-4">
+                    <div className="flex flex-col gap-4 pb-4">
                         <AnimatePresence>
-                            {quotas.map((model, index) => (
-                                <motion.div
-                                    key={model.model}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.2, delay: index * 0.04 }}
-                                >
-                                    <QuotaCard model={model} />
-                                </motion.div>
-                            ))}
+                            {PROVIDER_ORDER.map(provider => {
+                                const providerQuotas = groupedQuotas[provider]
+                                if (!providerQuotas?.length) return null
+
+                                return (
+                                    <div key={provider} className="flex flex-col gap-1.5">
+                                        <div className="px-1 text-[10px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-widest pl-2">
+                                            {provider}
+                                        </div>
+                                        {providerQuotas.map((model, index) => (
+                                            <motion.div
+                                                key={model.model}
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ duration: 0.2, delay: index * 0.04 }}
+                                            >
+                                                <QuotaCard model={model} />
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                )
+                            })}
                         </AnimatePresence>
                     </div>
                 </div>

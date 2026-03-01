@@ -1,6 +1,5 @@
 import { autoUpdater } from 'electron-updater'
-import { BrowserWindow, ipcMain } from 'electron'
-import { is } from '@electron-toolkit/utils'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { info, error } from './core/logger'
 
 export function initUpdater(mainWindow: BrowserWindow): void {
@@ -47,7 +46,7 @@ export function initUpdater(mainWindow: BrowserWindow): void {
 
     // IPC handlers
     ipcMain.handle('check-for-updates', () => {
-        if (is.dev) {
+        if (!app.isPackaged) {
             info('Skipping update check in dev mode')
             mainWindow.webContents.send('update-status', { status: 'not-available' }) // Mock response
             return
@@ -60,7 +59,7 @@ export function initUpdater(mainWindow: BrowserWindow): void {
     })
 
     // Initial check if not dev
-    if (!is.dev) {
+    if (app.isPackaged) {
         setTimeout(() => {
             autoUpdater.checkForUpdatesAndNotify()
         }, 3000)

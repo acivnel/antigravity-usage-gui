@@ -2,11 +2,17 @@ import { app } from 'electron'
 import { join } from 'path'
 import { appendFileSync, existsSync, mkdirSync } from 'fs'
 
-const LOG_DIR = app.getPath('logs')
-const LOG_FILE = join(LOG_DIR, 'antigravity-usage.log')
+let logFilePath: string | null = null
 
-if (!existsSync(LOG_DIR)) {
-    mkdirSync(LOG_DIR, { recursive: true })
+function getLogFile(): string {
+    if (!logFilePath) {
+        const logDir = app.getPath('logs')
+        if (!existsSync(logDir)) {
+            mkdirSync(logDir, { recursive: true })
+        }
+        logFilePath = join(logDir, 'antigravity-usage.log')
+    }
+    return logFilePath
 }
 
 export function debug(category: string, message: string, ...args: any[]): void {
@@ -35,7 +41,7 @@ function log(level: string, category: string, message: string, ...args: any[]): 
 
     // File output
     try {
-        appendFileSync(LOG_FILE, logMessage)
+        appendFileSync(getLogFile(), logMessage)
     } catch (err) {
         console.error('Failed to write to log file:', err)
     }

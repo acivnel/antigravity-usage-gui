@@ -1,6 +1,7 @@
 import { app, shell, BrowserWindow, ipcMain } from 'electron'
 import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
+
+
 import { startOAuthFlow } from './lib/google/oauth'
 import { getTokenManager } from './lib/google/token-manager'
 import { fetchQuota } from './lib/quota/service'
@@ -8,7 +9,7 @@ import { initTray } from './lib/tray'
 import { initUpdater } from './lib/updater'
 
 
-let mainWindow: BrowserWindow | null = null
+let mainWindow: Electron.BrowserWindow | null = null
 
 function createWindow(): void {
     // Create the browser window.
@@ -25,17 +26,17 @@ function createWindow(): void {
         }
     })
 
-    mainWindow.on('ready-to-show', () => {
+    mainWindow?.on('ready-to-show', () => {
         mainWindow?.show()
     })
 
-    mainWindow.webContents.setWindowOpenHandler((details) => {
+    mainWindow?.webContents.setWindowOpenHandler((details) => {
         shell.openExternal(details.url)
         return { action: 'deny' }
     })
 
     // Close to tray behavior
-    mainWindow.on('close', (event) => {
+    mainWindow?.on('close', (event) => {
         if (!(app as any).isQuitting) {
             event.preventDefault()
             mainWindow?.hide()
@@ -45,28 +46,33 @@ function createWindow(): void {
     })
 
     // HMR for renderer base on electron-vite cli.
-    if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
-        mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
+    if (!app.isPackaged && process.env['ELECTRON_RENDERER_URL']) {
+        mainWindow?.loadURL(process.env['ELECTRON_RENDERER_URL'])
     } else {
-        mainWindow.loadFile(join(__dirname, '../renderer/index.html'))
+        mainWindow?.loadFile(join(__dirname, '../renderer/index.html'))
     }
 }
 
-// Add isQuitting flag to app
-Object.defineProperty(app, 'isQuitting', {
-    value: false,
-    writable: true
-})
 
-app.on('before-quit', () => {
-    (app as any).isQuitting = true
-})
 
 app.whenReady().then(() => {
-    electronApp.setAppUserModelId('com.electron')
+    // Add isQuitting flag to app
+    Object.defineProperty(app, 'isQuitting', {
+        value: false,
+        writable: true
+    })
 
-    app.on('browser-window-created', (_, window) => {
-        optimizer.watchWindowShortcuts(window)
+    app.on('before-quit', () => {
+        (app as any).isQuitting = true
+    })
+
+    // Set app user model id for windows
+    if (process.platform === 'win32') {
+        app.setAppUserModelId('com.electron')
+    }
+
+    app.on('browser-window-created', () => {
+        // You can add custom window management here if needed
     })
 
     // IPC Handlers
